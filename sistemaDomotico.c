@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 /***( Function prototypes )***********************************************/
 
@@ -117,6 +118,25 @@ static void *pEnvironment(void *arg) {
     case 5:
       break;
     case 6:
+      printf("Enviando peticion de entrada a la Casa del residente...\n");
+      fflush(stdout);
+
+      OutMsg.signal = sVisistanteSoliticaAcceso;
+      OutMsg.value = 1;
+      sendMessage(&(queue[PANEL_ACCESO]), OutMsg);
+      sleep(1);
+
+      puts("\nComo residente puedes:\n"
+           "0. Rechazar Invitado.\n"
+           "1. Aceptar Invitado.");
+      fflush(stdout);
+
+      fflush(stdin);
+      fgets(line, sizeof(line), stdin);
+      sscanf(line, "%lf", &OutMsg.value);
+
+      OutMsg.signal = sRespuestaResidente;
+      sendMessage(&(queue[CASA]), OutMsg);
       break;
     case 7:
       puts("\n0. Desactivar seguridad\n"
@@ -380,6 +400,9 @@ static void *pControladorCasa(void *arg) {
     case EsperandoRespuestaResidente:
       switch (InMsg.signal) {
       case sRespuestaResidente:
+        printf("\t\t\t Respuesta Residente: %lf.\n", InMsg.value);
+        fflush(stdout);
+
         OutMsg.signal = sInvitadoAcepta;
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[SISTEMA]), OutMsg);
