@@ -11,8 +11,7 @@
 
 /***( Global variables )**************************************************/
 
-msgq_t queue[NUM_QUEUES]; /* declare queue as an array of
-                              message queues */
+msgq_t queue[NUM_QUEUES]; /* declare queue as an array of message queues */
 
 /***( Support functions )*************************************************/
 

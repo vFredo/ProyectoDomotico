@@ -1,38 +1,37 @@
-/*******************************************************************************
+/**************************************************************************
  *
- *  pMLusrConf.h -   Manifest Constants and Types for concurrent access to a
- *                   circular buffer modelling a message queue
+ *  pMLusrConf.h -   Manifest Constants and Types for concurrent access to
+ *                   a circular buffer modelling a message queue
  *
  *   Notes:          User defined according to application
  *
- *******************************************************************************/
+ *************************************************************************/
 
-/***( Manifest constants for fser-defined queuing system  )********************/
+/***( Manifest constants for fser-defined queuing system  )***************/
 
 #define BUFSIZE 16    /* number of slots in queues */
 #define NUM_QUEUES 10 /* number of queues */
 
-#define CONTROLADOR_CASA 0
-#define CONTROLADOR_SISTEMA 1
+#define CASA 0
+#define SISTEMA 1
+#define REGADO 2
+#define SENSOR_MOVIMIENTO 3
+#define SENSOR_HUMO 4
+#define SENSOR_HUMEDAD 5
+#define SENSOR_FOTOELECTRICO 6
+#define SENSOR_RFID 7
+#define PANEL_ACCESO 8
 
-#define REGADO_ENV 2
+#define CASA_ENV 9
 
-#define SENSOR_MOVIMIENTO_ENV 3
-#define SENSOR_HUMO_ENV 4
-#define SENSOR_HUMEDAD_ENV 5
-#define SENSOR_FOTOELECTRICO_ENV 6
-#define SENSOR_RFID_ENV 7
-#define PANEL_ACCESO_ENV 8
-#define CONTROLADOR_CASA_ENV 9
-
-/***( User-defined message structure )*****************************************/
+/***( User-defined message structure )************************************/
 
 typedef struct {
   int signal;
   double value;
 } msg_t;
 
-/***( User-defined signals)****************************************************/
+/***( User-defined signals)***********************************************/
 
 typedef enum { sMovimiento } TO_SENSOR_MOVIMIENTO;
 
@@ -44,20 +43,22 @@ typedef enum { sTarjetaEnSensor } TO_SENSOR_RFID;
 
 typedef enum { sLlegaCarro } TO_SENSOR_FOTOELECTRICO;
 
+typedef enum { sVisistanteSoliticaAcceso } TO_PANEL_ACCESO;
+
 typedef enum {
   sNivelHumoCasa,
   sMovimientoCasa,
   sRoboDetenido,
   sNotificarCasa,
-  sSeguridadActiva
-} TO_CONTROLADOR_CASA;
-
-typedef enum { sTiempoRegado } TO_REGADO;
+  sSeguridadActiva,
+  sRespuestaResidente
+} TO_CASA;
 
 typedef enum {
   sActivarAspersores,
   sDesactivarAspersores,
-} FROM_REGADO;
+  sTiempoRegado
+} TO_REGADO;
 
 typedef enum {
   sLlegaPolicia,
@@ -71,22 +72,24 @@ typedef enum {
   sSolicitud,
 } TO_SISTEMA;
 
-typedef enum { sVisistanteSoliticaAcceso } TO_PANEL_ACCESO;
+/***( User-defined EFSM states)*******************************************/
 
-/***( User-defined EFSM states)************************************************/
+typedef enum { IdleMov } SENSOR_MOVIMIENTO_ESTADOS;
 
-typedef enum { IdleM } SENSOR_MOVIENTO_ESTADOS;
+typedef enum { IdleHumo } SENSOR_HUMO_ESTADOS;
 
-typedef enum { IdleC } CONTROLADOR_CASA_ESTADOS;
+typedef enum { IdleHumedad } SENSOR_HUMEDAD_ESTADOS;
 
-typedef enum { IdleH } SENSOR_HUMO_ESTADOS;
+typedef enum { IdleFoto } SENSOR_FOTOELECTRICO_ESTADOS;
 
-typedef enum { IdleHu } SENSOR_HUMEDAD_ESTADOS;
+typedef enum { IdleRFID } SENSOR_RFID_ESTADOS;
 
-typedef enum { IdleF } SENSOR_FOTOELECTRICO_ESTADOS;
+typedef enum { IdlePanel } PANEL_ACCESO_ESTADOS;
+
+typedef enum { IdleCasa, EsperandoRespuestaResidente } CASA_ESTADOS;
 
 typedef enum {
-  IdleS,
+  IdleSistema,
   EsperandoConfirmacion,
   EsperandoPeaton,
   EsperandoFoto,
@@ -94,8 +97,4 @@ typedef enum {
   EsperandoPolicia
 } SISTEMA_ESTADOS;
 
-typedef enum { IdleP } PANEL_ACCESO_ESTADOS;
-
-typedef enum { IdleR } SENSOR_RFID_ESTADOS;
-
-typedef enum { IdleRe, Regando } REGADO_ESTADOS;
+typedef enum { IdleRegado, Regando } REGADO_ESTADOS;
