@@ -9,8 +9,8 @@
 
 /***( Manifest constants for fser-defined queuing system  )***************/
 
-#define BUFSIZE 16    /* number of slots in queues */
-#define NUM_QUEUES 10 /* number of queues */
+#define BUFSIZE 16   /* number of slots in queues */
+#define NUM_QUEUES 9 /* number of queues */
 
 #define CASA 0
 #define SISTEMA 1
@@ -21,8 +21,6 @@
 #define SENSOR_FOTOELECTRICO 6
 #define SENSOR_RFID 7
 #define PANEL_ACCESO 8
-
-#define CASA_ENV 9
 
 /***( User-defined message structure )************************************/
 
@@ -45,6 +43,8 @@ typedef enum { sLlegaCarro } TO_SENSOR_FOTOELECTRICO;
 
 typedef enum { sVisistanteSoliticaAcceso } TO_PANEL_ACCESO;
 
+typedef enum { sTiempoRegado } TO_REGADO;
+
 typedef enum {
   sNivelHumoCasa,
   sMovimientoCasa,
@@ -53,12 +53,6 @@ typedef enum {
   sSeguridadActiva,
   sRespuestaResidente
 } TO_CASA;
-
-typedef enum {
-  sActivarAspersores,
-  sDesactivarAspersores,
-  sTiempoRegado
-} TO_REGADO;
 
 typedef enum {
   sLlegaPolicia,

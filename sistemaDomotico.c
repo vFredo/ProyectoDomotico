@@ -69,7 +69,7 @@ static void *pEnvironment(void *arg) {
   for (;;) {
     puts("1. Activar Sensor Movimiento de Casa\n"
          "2. On/Off Alarma Humo de Casa (Sensor Humo)\n"
-         "3. On/Off Riego Plantas (Sensor Humedad)\n"
+         "3. Riego plantas (Sensor Humedad)\n"
          "4. Ingreso carro (Sensor Foto Electricto)\n"
          "5. Ingreso residente (Sensor RFID)\n"
          "6. Ingreso visitante (Panel Acceso)\n"
@@ -420,5 +420,41 @@ static void *pControladorCasa(void *arg) {
   return NULL;
 }
 
+static void *pRegado(void *arg) {
+  REGADO_ESTADOS state, state_next;
+  msg_t InMsg, OutMsg;
+  state_next = IdleRegado;
+
+  double tiempo_regado = 0;
+  int exit = 0;
+  while (!exit) {
+    state = state_next;
+    InMsg = receiveMessage(&(queue[REGADO]));
+
+    switch (state) {
+    case IdleRegado:
+      switch (InMsg.signal) {
+      case sTiempoRegado:
+        tiempo_regado = InMsg.value;
+        printf("\t\t\t Activando aspersores por %lf sec.\n", tiempo_regado);
+        fflush(stdout);
+        state_next = Regando;
+        break;
+      default:
+        break;
+      }
+      break;
+    case Regando:
+      sleep(tiempo_regado);
+      printf("\t\t\t Desactivando aspersores.\n");
+      fflush(stdout);
+      exit = 1;
+      break;
+    default:
+      break;
+    }
+  }
+  return NULL;
+}
+
 static void *pSistema(void *arg) { return NULL; }
-static void *pRegado(void *arg) { return NULL; }
