@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 /***( Function prototypes )***********************************************/
 
@@ -20,7 +21,7 @@ static void *pEnvironment(void *arg);
 int main(void) {
   pthread_t mov_tid, humo_tid, humedad_tid, foto_tid, rfid_tid;
   pthread_t sistema_tid, casa_tid;
-  pthread_t panel_acc_tid, regado_tid;
+  pthread_t panel_acc_tid;
   pthread_t env_tid;
 
   system("clear");
@@ -36,7 +37,6 @@ int main(void) {
   pthread_create(&humedad_tid, NULL, pSensorHumedad, NULL);
   pthread_create(&foto_tid, NULL, pSensorFotoelectrico, NULL);
   pthread_create(&rfid_tid, NULL, pSensorRFID, NULL);
-  pthread_create(&regado_tid, NULL, pRegado, NULL);
   pthread_create(&panel_acc_tid, NULL, pPanelAcceso, NULL);
   pthread_create(&sistema_tid, NULL, pSistema, NULL);
   pthread_create(&casa_tid, NULL, pControladorCasa, NULL);
@@ -48,7 +48,6 @@ int main(void) {
   pthread_join(humedad_tid, NULL);
   pthread_join(foto_tid, NULL);
   pthread_join(rfid_tid, NULL);
-  pthread_join(regado_tid, NULL);
   pthread_join(panel_acc_tid, NULL);
   pthread_join(sistema_tid, NULL);
   pthread_join(casa_tid, NULL);
@@ -67,14 +66,15 @@ static void *pEnvironment(void *arg) {
   msg_t OutMsg;
 
   for (;;) {
-    puts("1. Activar Sensor Movimiento de Casa\n"
-         "2. On/Off Alarma Humo de Casa (Sensor Humo)\n"
+    puts("\n1. Activar Sensor Movimiento de Casa\n"
+         "2. Nivel de Humo (Sensor Humo)\n"
          "3. Riego plantas (Sensor Humedad)\n"
          "4. Ingreso carro (Sensor Foto Electricto)\n"
          "5. Ingreso residente (Sensor RFID)\n"
          "6. Ingreso visitante (Panel Acceso)\n"
          "7. On/Off seguridad de Casa\n"
-         "8. Exit");
+         "8. Llega policia a la unidad Residencial\n"
+         "9. Exit");
     fflush(stdout);
 
     fflush(stdin);
@@ -83,16 +83,12 @@ static void *pEnvironment(void *arg) {
 
     switch (choice) {
     case 1:
-      printf("Enviando señal de movimiento al controlador de la casa...\n");
-      fflush(stdout);
-
       OutMsg.signal = sMovimiento;
       OutMsg.value = 1;
       sendMessage(&(queue[SENSOR_MOVIMIENTO]), OutMsg);
       break;
     case 2:
-      puts("\n0. Desactivar alarma humo\n"
-           "1. Activar alarma humo");
+      printf("Digite un valor para el nivel de humo entre 0.0 y 1.0:\n");
       fflush(stdout);
 
       fflush(stdin);
@@ -114,17 +110,34 @@ static void *pEnvironment(void *arg) {
       sendMessage(&(queue[SENSOR_HUMEDAD]), OutMsg);
       break;
     case 4:
-      break;
-    case 5:
-      break;
-    case 6:
-      printf("Enviando peticion de entrada a la Casa del residente...\n");
+      OutMsg.signal = sLlegaCarro;
+      sendMessage(&(queue[SENSOR_FOTOELECTRICO]), OutMsg);
+
+      printf("Digite la placa del carro:\n");
       fflush(stdout);
 
+      fflush(stdin);
+      fgets(line, sizeof(line), stdin);
+      sscanf(line, "%s", OutMsg.placa);
+
+      OutMsg.signal = sLecturaCamara;
+      sendMessage(&(queue[SISTEMA]), OutMsg);
+      break;
+    case 5:
+      printf("Digite el codigo de la tarjeta RFID:\n");
+      fflush(stdout);
+
+      fflush(stdin);
+      fgets(line, sizeof(line), stdin);
+      sscanf(line, "%lf", &OutMsg.value);
+
+      OutMsg.signal = sTarjetaEnSensor;
+      sendMessage(&(queue[SENSOR_RFID]), OutMsg);
+      break;
+    case 6:
       OutMsg.signal = sVisistanteSoliticaAcceso;
       OutMsg.value = 1;
       sendMessage(&(queue[PANEL_ACCESO]), OutMsg);
-      sleep(1);
 
       puts("\nComo residente puedes:\n"
            "0. Rechazar Invitado.\n"
@@ -151,6 +164,10 @@ static void *pEnvironment(void *arg) {
       sendMessage(&(queue[CASA]), OutMsg);
       break;
     case 8:
+      OutMsg.signal = sLlegaPolicia;
+      sendMessage(&(queue[SISTEMA]), OutMsg);
+      break;
+    case 9:
       exit(0);
       break;
     default:
@@ -174,6 +191,8 @@ static void *pSensorMovimiento(void *arg) {
     case IdleMov:
       switch (InMsg.signal) {
       case sMovimiento:
+        printf("\t\t\t Sensor Movimiento -> Casa.\n");
+        fflush(stdout);
         OutMsg.signal = sMovimientoCasa;
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[CASA]), OutMsg);
@@ -202,6 +221,8 @@ static void *pSensorHumo(void *arg) {
     case IdleHumo:
       switch (InMsg.signal) {
       case sNivelHumo:
+        printf("\t\t\t Sensor Humo -> Casa.\n");
+        fflush(stdout);
         OutMsg.signal = sNivelHumoCasa;
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[CASA]), OutMsg);
@@ -230,6 +251,8 @@ static void *pSensorHumedad(void *arg) {
     case IdleHumedad:
       switch (InMsg.signal) {
       case sNivelHumedad:
+        printf("\t\t\t Sensor Humo -> Sistema.\n");
+        fflush(stdout);
         OutMsg.signal = sNivelHumedadSistema;
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[SISTEMA]), OutMsg);
@@ -258,8 +281,9 @@ static void *pSensorFotoelectrico(void *arg) {
     case IdleFoto:
       switch (InMsg.signal) {
       case sLlegaCarro:
+        printf("\t\t\t Sensor Fotoelectrico -> Sistema.\n");
+        fflush(stdout);
         OutMsg.signal = sLlegaCarroSistema;
-        OutMsg.value = InMsg.value;
         sendMessage(&(queue[SISTEMA]), OutMsg);
         state_next = IdleFoto;
         break;
@@ -286,6 +310,8 @@ static void *pSensorRFID(void *arg) {
     case IdleRFID:
       switch (InMsg.signal) {
       case sTarjetaEnSensor:
+        printf("\t\t\t Sensor RFID -> Sistema.\n");
+        fflush(stdout);
         OutMsg.signal = sLecturaRFID;
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[SISTEMA]), OutMsg);
@@ -314,6 +340,8 @@ static void *pPanelAcceso(void *arg) {
     case IdlePanel:
       switch (InMsg.signal) {
       case sVisistanteSoliticaAcceso:
+        printf("\t\t\t Panel de Acceso -> Sistema.\n");
+        fflush(stdout);
         OutMsg.signal = sSolicitud;
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[SISTEMA]), OutMsg);
@@ -344,7 +372,8 @@ static void *pControladorCasa(void *arg) {
     case IdleCasa:
       switch (InMsg.signal) {
       case sNotificarCasa:
-        printf("\t\t\t Notificando al residente de una visita.\n");
+        printf("\t\t\t Notificando al residente de una visita.\n"
+               "\t\t\t Casa -> Residente\n");
         fflush(stdout);
         state_next = EsperandoRespuestaResidente;
         break;
@@ -355,10 +384,14 @@ static void *pControladorCasa(void *arg) {
         state_next = IdleCasa;
         break;
       case sNivelHumoCasa:
-        if (InMsg.value == 1) {
-          printf("\t\t\t Alarma de humo activada.\n");
+        if (InMsg.value >= 0.7) {
+          printf("\t\t\t Alarma de humo activada. (Casa -> Sistema)\n");
           fflush(stdout);
+
           alarmaHumo = 1;
+          OutMsg.signal = sIncendio;
+          OutMsg.value = pthread_self();
+          sendMessage(&(queue[SISTEMA]), OutMsg);
         } else {
           printf("\t\t\t Alarma de humo desactivada.\n");
           fflush(stdout);
@@ -368,7 +401,7 @@ static void *pControladorCasa(void *arg) {
         break;
       case sMovimientoCasa:
         if (seguridad_activa == 1) {
-          printf("\t\t\t Alarma de Robo activada.\n");
+          printf("\t\t\t Alarma de Robo activada. Casa -> Sistema\n");
           fflush(stdout);
 
           alarmaRobo = 1;
@@ -382,14 +415,31 @@ static void *pControladorCasa(void *arg) {
         state_next = IdleCasa;
         break;
       case sSeguridadActiva:
-        if (InMsg.value == 1) {
-          printf("\t\t\t Seguridad activada.\n");
+        switch ((int)InMsg.value) {
+        case 0:
+          if (alarmaRobo == 1) {
+            printf("\t\t\t No se puede desactivar, Alarma de robo activa.\n");
+            fflush(stdout);
+          } else {
+            printf("\t\t\t Seguridad desactivada.\n");
+            fflush(stdout);
+            seguridad_activa = 0;
+          }
+          break;
+        case 1:
+          if (seguridad_activa != 1) {
+            printf("\t\t\t Seguridad activada.\n");
+            fflush(stdout);
+            seguridad_activa = 1;
+          } else {
+            printf("\t\t\t La seguridad ya esta activada.\n");
+            fflush(stdout);
+          }
+          break;
+        default:
+          printf("\t\t\t Opcion invalida.\n");
           fflush(stdout);
-          seguridad_activa = 1;
-        } else {
-          printf("\t\t\t Seguridad desactivada.\n");
-          fflush(stdout);
-          seguridad_activa = 0;
+          break;
         }
         state_next = IdleCasa;
         break;
@@ -400,7 +450,8 @@ static void *pControladorCasa(void *arg) {
     case EsperandoRespuestaResidente:
       switch (InMsg.signal) {
       case sRespuestaResidente:
-        printf("\t\t\t Respuesta Residente: %lf.\n", InMsg.value);
+        printf("\t\t\t Respuesta Residente: %lf Casa -> Sistema.\n",
+               InMsg.value);
         fflush(stdout);
 
         OutMsg.signal = sInvitadoAcepta;
@@ -421,34 +472,189 @@ static void *pControladorCasa(void *arg) {
 }
 
 static void *pRegado(void *arg) {
-  REGADO_ESTADOS state, state_next;
+  REGADO_ESTADOS state;
   msg_t InMsg, OutMsg;
-  state_next = IdleRegado;
+  state = IdleRegado;
 
+  InMsg = receiveMessage(&(queue[REGADO]));
   double tiempo_regado = 0;
-  int exit = 0;
-  while (!exit) {
-    state = state_next;
-    InMsg = receiveMessage(&(queue[REGADO]));
 
+  switch (state) {
+  case IdleRegado:
+    switch (InMsg.signal) {
+    case sTiempoRegado:
+      tiempo_regado = InMsg.value;
+      printf("\t\t\t Activando aspersores por %lf sec.\n", tiempo_regado);
+      fflush(stdout);
+
+      sleep((unsigned int)tiempo_regado);
+
+      printf("\t\t\t Desactivando aspersores.\n");
+      fflush(stdout);
+      break;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  return NULL;
+}
+
+static void *pSistema(void *arg) {
+  SISTEMA_ESTADOS state, state_next;
+  msg_t InMsg, OutMsg;
+  state_next = IdleSistema;
+  pthread_t regado_tid;
+
+  double tarjetasValidas[4] = {1, 2, 3, 4};
+  char placasValidas[5][7] = {"JFU864", "AAA000", "AAA001", "BBB000", "BBB001"};
+  int tarjetaValida = 0, placaValida = 0;
+
+  for (;;) {
+    state = state_next;
+    InMsg = receiveMessage(&(queue[SISTEMA]));
     switch (state) {
-    case IdleRegado:
+    case IdleSistema:
       switch (InMsg.signal) {
-      case sTiempoRegado:
-        tiempo_regado = InMsg.value;
-        printf("\t\t\t Activando aspersores por %lf sec.\n", tiempo_regado);
+      case sSolicitud:
+        printf("\t\t\t Sistema -> Casa\n");
         fflush(stdout);
-        state_next = Regando;
+        OutMsg.signal = sNotificarCasa;
+        sendMessage(&(queue[CASA]), OutMsg);
+        state_next = EsperandoConfirmacion;
+        break;
+      case sLlegaCarroSistema:
+        printf("\t\t\t Prendiendo camara sistema.\n");
+        fflush(stdout);
+        state_next = EsperandoFoto;
+        break;
+      case sLecturaRFID:
+        for (int i = 0; i < 4; i++) {
+          if (tarjetasValidas[i] == InMsg.value) {
+            tarjetaValida = 1;
+            break;
+          }
+        }
+
+        if (tarjetaValida) {
+          tarjetaValida = 0;
+          printf("\t\t\t Tarjeta Valida. Abriendo puerta por 5 sec.\n");
+          fflush(stdout);
+
+          sleep(5);
+
+          printf("\t\t\t Se cierra la puerta.\n");
+          fflush(stdout);
+        } else {
+          printf("\t\t\t Tarjeta invalida.\n");
+          fflush(stdout);
+        }
+        break;
+      case sIncendio:
+        printf("\t\t\t Alertar vecinos de incendio\n");
+        fflush(stdout);
+        printf("\t\t\t Alertar bomberos de incendio\n");
+        fflush(stdout);
+        state_next = IdleSistema;
+        break;
+      case sNivelHumedadSistema:
+        if (InMsg.value <= 0.5) {
+
+          // Creando el proceso de regado
+          pthread_create(&regado_tid, NULL, pRegado, NULL);
+
+          printf("\t\t\t Se tiene que activar los aspersores (Sistema -> "
+                 "Regado)\n");
+          fflush(stdout);
+
+          OutMsg.signal = sTiempoRegado;
+          OutMsg.value = 5 / InMsg.value;
+          sendMessage(&(queue[REGADO]), OutMsg);
+        } else {
+          printf("\t\t\t No se necesita regar las plantas.\n");
+          fflush(stdout);
+        }
+        state_next = IdleSistema;
+      case sRobo:
+        printf("\t\t\t Alertando Vecinos. (Sistema -> Casa)\n");
+        fflush(stdout);
+        printf("\t\t\t Alertando Policia.\n");
+        fflush(stdout);
+        state_next = EsperandoPolicia;
         break;
       default:
         break;
       }
       break;
-    case Regando:
-      sleep(tiempo_regado);
-      printf("\t\t\t Desactivando aspersores.\n");
-      fflush(stdout);
-      exit = 1;
+    case EsperandoConfirmacion:
+      switch (InMsg.signal) {
+      case sInvitadoAcepta:
+        fflush(stdout);
+        if (InMsg.value == 1) {
+          printf("\t\t\t Se abre la puerta peatonal para el visitante por 5 "
+                 "sec.\n");
+          fflush(stdout);
+
+          sleep(5);
+
+          printf("\t\t\t Se cierra la puerta.\n");
+          fflush(stdout);
+        } else {
+          printf("\t\t\t El residente no espera visitantes.\n");
+          fflush(stdout);
+        }
+        state_next = IdleSistema;
+        break;
+      default:
+        sendMessage(&(queue[SISTEMA]), InMsg);
+        break;
+      }
+    case EsperandoPolicia:
+      switch (InMsg.signal) {
+      case sLlegaPolicia:
+        printf("\t\t\t Llego policia (Sistema -> Casa)\n");
+        fflush(stdout);
+        OutMsg.signal = sRoboDetenido;
+        sendMessage(&(queue[CASA]), OutMsg);
+        state_next = IdleSistema;
+        break;
+      default:
+        sendMessage(&(queue[SISTEMA]), InMsg);
+        break;
+      }
+      break;
+    case EsperandoFoto:
+      switch (InMsg.signal) {
+      case sLecturaCamara:
+        for (int i = 0; i < 5; i++) {
+          // if (placasValidas[i] == InMsg.placa) {
+          if (strcmp(placasValidas[i], InMsg.placa) == 0) {
+            printf("%s - %s\n", placasValidas[i], InMsg.placa);
+            placaValida = 1;
+            break;
+          }
+        }
+        if (placaValida) {
+          placaValida = 0;
+          printf("\t\t\t Se abre la puerta parqueadero por 5 sec.\n");
+          fflush(stdout);
+
+          sleep(5);
+
+          printf("\t\t\t Se cierra la puerta.\n");
+          fflush(stdout);
+        } else {
+          printf("La placa es invalida.\n");
+          fflush(stdout);
+        }
+        state_next = IdleSistema;
+        break;
+      default:
+        sendMessage(&(queue[SISTEMA]), InMsg);
+        break;
+      }
       break;
     default:
       break;
@@ -456,5 +662,3 @@ static void *pRegado(void *arg) {
   }
   return NULL;
 }
-
-static void *pSistema(void *arg) { return NULL; }

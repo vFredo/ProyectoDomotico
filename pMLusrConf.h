@@ -27,6 +27,7 @@
 typedef struct {
   int signal;
   double value;
+  char placa[7];
 } msg_t;
 
 /***( User-defined signals)***********************************************/
@@ -85,9 +86,7 @@ typedef enum { IdleCasa, EsperandoRespuestaResidente } CASA_ESTADOS;
 typedef enum {
   IdleSistema,
   EsperandoConfirmacion,
-  EsperandoPeaton,
   EsperandoFoto,
-  EsperandoCarro,
   EsperandoPolicia
 } SISTEMA_ESTADOS;
 
