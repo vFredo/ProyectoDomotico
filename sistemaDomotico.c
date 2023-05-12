@@ -18,6 +18,9 @@ static void *pControladorCasa(void *arg);
 static void *pSistema(void *arg);
 static void *pEnvironment(void *arg);
 
+/***( Auxiliar processes )************************************************/
+static void *abrirPuerta(void *arg);
+
 int main(void) {
   pthread_t mov_tid, humo_tid, humedad_tid, foto_tid, rfid_tid;
   pthread_t sistema_tid, casa_tid;
@@ -506,7 +509,7 @@ static void *pSistema(void *arg) {
   SISTEMA_ESTADOS state, state_next;
   msg_t InMsg, OutMsg;
   state_next = IdleSistema;
-  pthread_t regado_tid;
+  pthread_t regado_tid, peatonal_pid, parqueadero_pid;
 
   double tarjetasValidas[4] = {1, 2, 3, 4};
   char placasValidas[5][7] = {"JFU864", "AAA000", "AAA001", "BBB000", "BBB001"};
@@ -531,8 +534,7 @@ static void *pSistema(void *arg) {
         state_next = EsperandoFoto;
         break;
       case sLecturaRFID:
-        for (int i = 0;
-             i < sizeof(tarjetasValidas) / sizeof(tarjetasValidas[0]); i++) {
+        for (int i = 0; i < sizeof(tarjetasValidas) / sizeof(tarjetasValidas[0]); i++) {
           if (tarjetasValidas[i] == InMsg.value) {
             tarjetaValida = 1;
             break;
@@ -541,13 +543,8 @@ static void *pSistema(void *arg) {
 
         if (tarjetaValida) {
           tarjetaValida = 0;
-          printf("\t\t\t Tarjeta Valida. Abriendo puerta por 5 sec.\n");
-          fflush(stdout);
-
-          sleep(5);
-
-          printf("\t\t\t Se cierra la puerta.\n");
-          fflush(stdout);
+          printf("\t\t\t Tarjeta ID Valida.\n");
+          pthread_create(&peatonal_pid, NULL, abrirPuerta, (void *)"peatonal");
         } else {
           printf("\t\t\t Tarjeta invalida.\n");
           fflush(stdout);
@@ -563,7 +560,6 @@ static void *pSistema(void *arg) {
         break;
       case sNivelHumedadSistema:
         if (InMsg.value <= 0.5) {
-
           // Creando el proceso de regado
           pthread_create(&regado_tid, NULL, pRegado, NULL);
 
@@ -596,16 +592,12 @@ static void *pSistema(void *arg) {
       case sInvitadoAcepta:
         fflush(stdout);
         if (InMsg.value == 1) {
-          printf("\t\t\t Se abre la puerta peatonal para el visitante por 5 "
-                 "sec.\n");
+          printf("\t\t\t  Invitado aceptado.\n");
           fflush(stdout);
 
-          sleep(5);
-
-          printf("\t\t\t Se cierra la puerta.\n");
-          fflush(stdout);
+          pthread_create(&peatonal_pid, NULL, abrirPuerta, (void *)"peatonal");
         } else {
-          printf("\t\t\t El residente no espera visitantes.\n");
+          printf("\t\t\t Invitado rechazado.\n");
           fflush(stdout);
         }
         state_next = IdleSistema;
@@ -635,8 +627,7 @@ static void *pSistema(void *arg) {
         printf("\t\t\t Apagar camara.\n");
         fflush(stdout);
 
-        for (int i = 0; i < sizeof(placasValidas) / sizeof(placasValidas[0]);
-             i++) {
+        for (int i = 0; i < sizeof(placasValidas) / sizeof(placasValidas[0]); i++) {
           if (strcmp(placasValidas[i], InMsg.placa) == 0) {
             placaValida = 1;
             break;
@@ -644,13 +635,7 @@ static void *pSistema(void *arg) {
         }
         if (placaValida) {
           placaValida = 0;
-          printf("\t\t\t Se abre la puerta parqueadero por 5 sec.\n");
-          fflush(stdout);
-
-          sleep(5);
-
-          printf("\t\t\t Se cierra la puerta.\n");
-          fflush(stdout);
+          pthread_create(&parqueadero_pid, NULL, abrirPuerta, (void *)"parqueadero");
         } else {
           printf("\t\t\t La placa es invalida.\n");
           fflush(stdout);
@@ -666,5 +651,17 @@ static void *pSistema(void *arg) {
       break;
     }
   }
+  return NULL;
+}
+
+/* Proceso auxiliar para la simulacion de abrir y cerrar puerta de la unidad */
+static void *abrirPuerta(void *arg) {
+  printf("\t\t\t Se abre la puerta %s por 5 sec.\n", (char *)arg);
+  fflush(stdout);
+
+  sleep(5);
+
+  printf("\t\t\t Se cierra la puerta.\n");
+  fflush(stdout);
   return NULL;
 }
