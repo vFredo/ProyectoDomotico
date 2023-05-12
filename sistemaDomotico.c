@@ -2,8 +2,8 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 /***( Function prototypes )***********************************************/
 
@@ -139,6 +139,7 @@ static void *pEnvironment(void *arg) {
       OutMsg.value = 1;
       sendMessage(&(queue[PANEL_ACCESO]), OutMsg);
 
+      sleep(1);
       puts("\nComo residente puedes:\n"
            "0. Rechazar Invitado.\n"
            "1. Aceptar Invitado.");
@@ -450,8 +451,7 @@ static void *pControladorCasa(void *arg) {
     case EsperandoRespuestaResidente:
       switch (InMsg.signal) {
       case sRespuestaResidente:
-        printf("\t\t\t Respuesta Residente: %lf Casa -> Sistema.\n",
-               InMsg.value);
+        printf("\t\t\t Casa -> Sistema.\n");
         fflush(stdout);
 
         OutMsg.signal = sInvitadoAcepta;
@@ -484,7 +484,7 @@ static void *pRegado(void *arg) {
     switch (InMsg.signal) {
     case sTiempoRegado:
       tiempo_regado = InMsg.value;
-      printf("\t\t\t Activando aspersores por %lf sec.\n", tiempo_regado);
+      printf("\t\t\t Activando aspersores por %d sec.\n", (int)tiempo_regado);
       fflush(stdout);
 
       sleep((unsigned int)tiempo_regado);
@@ -526,12 +526,13 @@ static void *pSistema(void *arg) {
         state_next = EsperandoConfirmacion;
         break;
       case sLlegaCarroSistema:
-        printf("\t\t\t Prendiendo camara sistema.\n");
+        printf("\t\t\t Prendiendo camara parqueadero.\n");
         fflush(stdout);
         state_next = EsperandoFoto;
         break;
       case sLecturaRFID:
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0;
+             i < sizeof(tarjetasValidas) / sizeof(tarjetasValidas[0]); i++) {
           if (tarjetasValidas[i] == InMsg.value) {
             tarjetaValida = 1;
             break;
@@ -578,6 +579,7 @@ static void *pSistema(void *arg) {
           fflush(stdout);
         }
         state_next = IdleSistema;
+        break;
       case sRobo:
         printf("\t\t\t Alertando Vecinos. (Sistema -> Casa)\n");
         fflush(stdout);
@@ -612,6 +614,7 @@ static void *pSistema(void *arg) {
         sendMessage(&(queue[SISTEMA]), InMsg);
         break;
       }
+      break;
     case EsperandoPolicia:
       switch (InMsg.signal) {
       case sLlegaPolicia:
@@ -632,9 +635,9 @@ static void *pSistema(void *arg) {
         printf("\t\t\t Apagar camara.\n");
         fflush(stdout);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < sizeof(placasValidas) / sizeof(placasValidas[0]);
+             i++) {
           if (strcmp(placasValidas[i], InMsg.placa) == 0) {
-            printf("%s - %s\n", placasValidas[i], InMsg.placa);
             placaValida = 1;
             break;
           }
@@ -649,7 +652,7 @@ static void *pSistema(void *arg) {
           printf("\t\t\t Se cierra la puerta.\n");
           fflush(stdout);
         } else {
-          printf("La placa es invalida.\n");
+          printf("\t\t\t La placa es invalida.\n");
           fflush(stdout);
         }
         state_next = IdleSistema;
