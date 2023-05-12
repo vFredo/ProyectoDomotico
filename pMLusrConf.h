@@ -87,7 +87,8 @@ typedef enum {
   IdleSistema,
   EsperandoConfirmacion,
   EsperandoFoto,
-  EsperandoPolicia
+  EsperandoPolicia,
+  ValidandoTarjetaRFID
 } SISTEMA_ESTADOS;
 
 typedef enum { IdleRegado, Regando } REGADO_ESTADOS;

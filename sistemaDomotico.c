@@ -551,6 +551,7 @@ static void *pSistema(void *arg) {
           printf("\t\t\t Tarjeta invalida.\n");
           fflush(stdout);
         }
+        state_next = IdleSistema;
         break;
       case sIncendio:
         printf("\t\t\t Alertar vecinos de incendio\n");
@@ -628,8 +629,10 @@ static void *pSistema(void *arg) {
     case EsperandoFoto:
       switch (InMsg.signal) {
       case sLecturaCamara:
+        printf("\t\t\t Apagar camara.\n");
+        fflush(stdout);
+
         for (int i = 0; i < 5; i++) {
-          // if (placasValidas[i] == InMsg.placa) {
           if (strcmp(placasValidas[i], InMsg.placa) == 0) {
             printf("%s - %s\n", placasValidas[i], InMsg.placa);
             placaValida = 1;
