@@ -6,7 +6,6 @@
 #include <unistd.h>
 
 /***( Function prototypes )***********************************************/
-
 static void *pSensorMovimiento(void *arg);
 static void *pSensorHumo(void *arg);
 static void *pSensorHumedad(void *arg);
@@ -21,15 +20,12 @@ static void *pEnvironment(void *arg);
 /***( Auxiliar processes )************************************************/
 static void *abrirPuerta(void *arg);
 
+/***( Main process )******************************************************/
 int main(void) {
   pthread_t mov_tid, humo_tid, humedad_tid, foto_tid, rfid_tid;
   pthread_t sistema_tid, casa_tid;
   pthread_t panel_acc_tid;
   pthread_t env_tid;
-
-  system("clear");
-  puts("Environment:                     Sistema Residencial Domotico\n"
-       "-------------------------------------------------------------\n");
 
   /* Create queues */
   initialiseQueues();
@@ -62,22 +58,25 @@ int main(void) {
 }
 
 /***( SDL system processes )**********************************************/
-
 static void *pEnvironment(void *arg) {
   char line[100];
   int choice;
   msg_t OutMsg;
 
+  system("clear");
   for (;;) {
-    puts("\n1. Activar Sensor Movimiento de Casa\n"
-         "2. Nivel de Humo (Sensor Humo)\n"
-         "3. Riego plantas (Sensor Humedad)\n"
-         "4. Ingreso carro (Sensor Foto Electricto)\n"
+    puts("Environment:                     Sistema Residencial Domotico\n"
+         "-------------------------------------------------------------\n"
+         "1. Activar sensor movimiento de casa\n"
+         "2. Nivel de humo (Sensor humo)\n"
+         "3. Riego plantas (Sensor humedad)\n"
+         "4. Ingreso carro (Sensor foto electricto)\n"
          "5. Ingreso residente (Sensor RFID)\n"
          "6. Ingreso visitante (Panel Acceso)\n"
-         "7. On/Off seguridad de Casa\n"
-         "8. Llega policia a la unidad Residencial\n"
-         "9. Exit");
+         "7. Seguridad casa On/Off\n"
+         "8. Llega policia a la unidad residencial\n"
+         "9. Residente acepta/rechaza invitado\n"
+         "10. Exit");
     fflush(stdout);
 
     fflush(stdin);
@@ -87,7 +86,6 @@ static void *pEnvironment(void *arg) {
     switch (choice) {
     case 1:
       OutMsg.signal = sMovimiento;
-      OutMsg.value = 1;
       sendMessage(&(queue[SENSOR_MOVIMIENTO]), OutMsg);
       break;
     case 2:
@@ -141,19 +139,6 @@ static void *pEnvironment(void *arg) {
       OutMsg.signal = sVisistanteSoliticaAcceso;
       OutMsg.value = 1;
       sendMessage(&(queue[PANEL_ACCESO]), OutMsg);
-
-      sleep(1);
-      puts("\nComo residente puedes:\n"
-           "0. Rechazar Invitado.\n"
-           "1. Aceptar Invitado.");
-      fflush(stdout);
-
-      fflush(stdin);
-      fgets(line, sizeof(line), stdin);
-      sscanf(line, "%lf", &OutMsg.value);
-
-      OutMsg.signal = sRespuestaResidente;
-      sendMessage(&(queue[CASA]), OutMsg);
       break;
     case 7:
       puts("\n0. Desactivar seguridad\n"
@@ -172,6 +157,18 @@ static void *pEnvironment(void *arg) {
       sendMessage(&(queue[SISTEMA]), OutMsg);
       break;
     case 9:
+      puts("\n0. Rechazar Invitado.\n"
+           "1. Aceptar Invitado.");
+      fflush(stdout);
+
+      fflush(stdin);
+      fgets(line, sizeof(line), stdin);
+      sscanf(line, "%lf", &OutMsg.value);
+
+      OutMsg.signal = sRespuestaResidente;
+      sendMessage(&(queue[CASA]), OutMsg);
+      break;
+    case 10:
       exit(0);
       break;
     default:
@@ -198,7 +195,6 @@ static void *pSensorMovimiento(void *arg) {
         printf("\t\t\t Sensor Movimiento -> Casa.\n");
         fflush(stdout);
         OutMsg.signal = sMovimientoCasa;
-        OutMsg.value = InMsg.value;
         sendMessage(&(queue[CASA]), OutMsg);
         state_next = IdleMov;
         break;
@@ -592,7 +588,7 @@ static void *pSistema(void *arg) {
       case sInvitadoAcepta:
         fflush(stdout);
         if (InMsg.value == 1) {
-          printf("\t\t\t  Invitado aceptado.\n");
+          printf("\t\t\t Invitado aceptado.\n");
           fflush(stdout);
 
           pthread_create(&peatonal_pid, NULL, abrirPuerta, (void *)"peatonal");

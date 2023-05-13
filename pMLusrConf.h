@@ -64,7 +64,7 @@ typedef enum {
   sIncendio,
   sRobo,
   sInvitadoAcepta,
-  sSolicitud,
+  sSolicitud
 } TO_SISTEMA;
 
 /***( User-defined EFSM states)*******************************************/
