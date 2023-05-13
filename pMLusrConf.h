@@ -81,6 +81,8 @@ typedef enum { IdleRFID } SENSOR_RFID_ESTADOS;
 
 typedef enum { IdlePanel } PANEL_ACCESO_ESTADOS;
 
+typedef enum { IdleRegado } REGADO_ESTADOS;
+
 typedef enum { IdleCasa, EsperandoRespuestaResidente } CASA_ESTADOS;
 
 typedef enum {
@@ -90,5 +92,3 @@ typedef enum {
   EsperandoPolicia,
   ValidandoTarjetaRFID
 } SISTEMA_ESTADOS;
-
-typedef enum { IdleRegado, Regando } REGADO_ESTADOS;
