@@ -10,17 +10,31 @@
 /***( Manifest constants for fser-defined queuing system  )***************/
 
 #define BUFSIZE 16   /* number of slots in queues */
-#define NUM_QUEUES 9 /* number of queues */
+#define NUM_QUEUES 18 /* number of queues */
 
-#define CASA 0
-#define SISTEMA 1
-#define REGADO 2
-#define SENSOR_MOVIMIENTO 3
-#define SENSOR_HUMO 4
-#define SENSOR_HUMEDAD 5
-#define SENSOR_FOTOELECTRICO 6
-#define SENSOR_RFID 7
-#define PANEL_ACCESO 8
+#define SISTEMA 0
+// n + 3 = sensor_mov_casa_n y n + 6 = sensor_humo_casa_n
+// casa 1 = 1
+// casa 2 = 2
+// casa 3 = 3
+
+// sensor_mov_casa_1 = 4
+// sensor_mov_casa_2 = 5
+// sensor_mov_casa_3 = 6
+
+// sensor_humo_casa_1 = 7
+// sensor_humo_casa_2 = 8
+// sensor_humo_casa_3 = 9
+
+// Sensor_humedad_1 = 10
+// Sensor_humedad_2 = 11
+// Sensor_humedad_3 = 12
+
+#define REGADO 13
+#define SENSOR_FOTOELECTRICO 14
+#define SENSOR_RFID 15
+#define PANEL_ACCESO 16
+#define SENSOR_HUMEDAD 17
 
 /***( User-defined message structure )************************************/
 
@@ -28,7 +42,13 @@ typedef struct {
   int signal;
   double value;
   char placa[7];
+  int sender;
 } msg_t;
+
+typedef struct {
+  int idParent;
+  int idSensor;
+} parametros;
 
 /***( User-defined signals)***********************************************/
 
