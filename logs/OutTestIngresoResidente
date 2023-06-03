@@ -1,0 +1,48 @@
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Digite el codigo de la tarjeta RFID:
+			 Sensor RFID -> Sistema.
+			 Tarjeta 1 ID Valida.
+			 Se abre la puerta peatonal por 5 sec.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Digite el codigo de la tarjeta RFID:
+			 Sensor RFID -> Sistema.
+			 Tarjeta 22 invalida.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Saliendo del programa...
+			 Se cierra la puerta.

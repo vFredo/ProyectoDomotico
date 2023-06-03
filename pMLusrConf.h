@@ -52,19 +52,19 @@ typedef struct {
 
 /***( User-defined signals)***********************************************/
 
-typedef enum { sMovimiento } TO_SENSOR_MOVIMIENTO;
+typedef enum { sMovimiento, sExitMov } TO_SENSOR_MOVIMIENTO;
 
-typedef enum { sNivelHumo } TO_SENSOR_HUMO;
+typedef enum { sNivelHumo, sExitHumo } TO_SENSOR_HUMO;
 
-typedef enum { sNivelHumedad } TO_SENSOR_HUMEDAD;
+typedef enum { sNivelHumedad, sExitHumedad } TO_SENSOR_HUMEDAD;
 
-typedef enum { sTarjetaEnSensor } TO_SENSOR_RFID;
+typedef enum { sTarjetaEnSensor, sExitRFID } TO_SENSOR_RFID;
 
-typedef enum { sLlegaCarro } TO_SENSOR_FOTOELECTRICO;
+typedef enum { sLlegaCarro, sExitFotoElectrico } TO_SENSOR_FOTOELECTRICO;
 
-typedef enum { sVisistanteSoliticaAcceso } TO_PANEL_ACCESO;
+typedef enum { sVisistanteSoliticaAcceso, sExitPanelAcceso } TO_PANEL_ACCESO;
 
-typedef enum { sTiempoRegado } TO_REGADO;
+typedef enum { sTiempoRegado, sExitRegado } TO_REGADO;
 
 typedef enum {
   sNivelHumoCasa,
@@ -72,7 +72,8 @@ typedef enum {
   sRoboDetenido,
   sNotificarCasa,
   sSeguridadActiva,
-  sRespuestaResidente
+  sRespuestaResidente,
+  sExitCasa
 } TO_CASA;
 
 typedef enum {
@@ -84,7 +85,8 @@ typedef enum {
   sIncendio,
   sRobo,
   sInvitadoAcepta,
-  sSolicitud
+  sSolicitud,
+  sExitSistema
 } TO_SISTEMA;
 
 /***( User-defined EFSM states)*******************************************/

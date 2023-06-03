@@ -33,18 +33,21 @@ int main(void) {
   /* Create queues */
   initialiseQueues();
 
+  system("clear");
+
   /* Create threads */
   pthread_create(&sistema_tid, NULL, pSistema, NULL);
   pthread_create(&foto_tid, NULL, pSensorFotoelectrico, NULL);
   pthread_create(&rfid_tid, NULL, pSensorRFID, NULL);
   pthread_create(&panel_acc_tid, NULL, pPanelAcceso, NULL);
+  sleep(5); // Dar tiempo a inicializar todos los procesos
   pthread_create(&env_tid, NULL, pEnvironment, NULL);
 
   /* Wait for threads to finish */
-  pthread_join(sistema_tid, NULL);
+  pthread_join(panel_acc_tid, NULL);
   pthread_join(foto_tid, NULL);
   pthread_join(rfid_tid, NULL);
-  pthread_join(panel_acc_tid, NULL);
+  pthread_join(sistema_tid, NULL);
   pthread_join(env_tid, NULL);
 
   /* Destroy queues */
@@ -55,11 +58,10 @@ int main(void) {
 /***( SDL system processes )**********************************************/
 static void *pEnvironment(void *arg) {
   char line[100];
-  int choice;
+  int choice, exit = 1;
   msg_t OutMsg;
 
-  system("clear");
-  for (;;) {
+  while (exit) {
     sleep(1);
     puts("\nEnvironment:                     Sistema Residencial Domotico\n"
          "-------------------------------------------------------------\n"
@@ -145,6 +147,7 @@ static void *pEnvironment(void *arg) {
       fgets(line, sizeof(line), stdin);
       sscanf(line, "%s", OutMsg.placa);
 
+      sleep(1);
       OutMsg.signal = sLecturaCamara;
       sendMessage(&(queue[SISTEMA]), OutMsg);
       break;
@@ -193,8 +196,7 @@ static void *pEnvironment(void *arg) {
       break;
     case 8:
 
-      printf("Elija la casa la cual llega la policia entre 1-%d\n",
-             NUM_CASAS);
+      printf("Elija la casa la cual llega la policia entre 1-%d\n", NUM_CASAS);
       fflush(stdout);
 
       fflush(stdin);
@@ -225,8 +227,22 @@ static void *pEnvironment(void *arg) {
       sendMessage(&(queue[OutMsg.sender]), OutMsg);
       break;
     case 10:
+      OutMsg.signal = sExitPanelAcceso;
+      sendMessage(&(queue[PANEL_ACCESO]), OutMsg);
+
+      OutMsg.signal = sExitFotoElectrico;
+      sendMessage(&(queue[SENSOR_FOTOELECTRICO]), OutMsg);
+
+      OutMsg.signal = sExitRFID;
+      sendMessage(&(queue[SENSOR_RFID]), OutMsg);
+
+      OutMsg.signal = sExitSistema;
+      sendMessage(&(queue[SISTEMA]), OutMsg);
+
       printf("Saliendo del programa...\n");
       fflush(stdout);
+
+      exit = 0;
       break;
     default:
       printf("Opcion no valida. Intente de nuevo...\n");
@@ -242,8 +258,9 @@ static void *pSensorMovimiento(void *arg) {
   msg_t InMsg, OutMsg;
   state_next = IdleMov;
   parametros par = *(parametros *)arg;
+  int stop = 1;
 
-  for (;;) {
+  while (stop) {
     state = state_next;
     InMsg = receiveMessage(&(queue[par.idSensor]));
     switch (state) {
@@ -256,6 +273,9 @@ static void *pSensorMovimiento(void *arg) {
         OutMsg.signal = sMovimientoCasa;
         sendMessage(&(queue[par.idParent]), OutMsg);
         state_next = IdleMov;
+        break;
+      case sExitMov:
+        stop = 0;
         break;
       default:
         break;
@@ -273,8 +293,9 @@ static void *pSensorHumo(void *arg) {
   msg_t InMsg, OutMsg;
   state_next = IdleHumo;
   parametros par = *(parametros *)arg;
+  int stop = 1;
 
-  for (;;) {
+  while (stop) {
     state = state_next;
     InMsg = receiveMessage(&(queue[par.idSensor]));
     switch (state) {
@@ -288,6 +309,9 @@ static void *pSensorHumo(void *arg) {
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[par.idParent]), OutMsg);
         state_next = IdleHumo;
+        break;
+      case sExitHumo:
+        stop = 0;
         break;
       default:
         break;
@@ -303,12 +327,13 @@ static void *pSensorHumo(void *arg) {
 static void *pSensorHumedad(void *arg) {
   SENSOR_HUMEDAD_ESTADOS state, state_next;
   state_next = IdleHumedad;
+  int stop = 1;
 
   msg_t InMsg, OutMsg;
   int zona = *(int *)arg;
-  for (;;) {
+  while (stop) {
     state = state_next;
-    InMsg = receiveMessage(&(queue[10+zona-1]));
+    InMsg = receiveMessage(&(queue[10 + zona - 1]));
     switch (state) {
     case IdleHumedad:
       switch (InMsg.signal) {
@@ -321,6 +346,9 @@ static void *pSensorHumedad(void *arg) {
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[SISTEMA]), OutMsg);
         state_next = IdleHumedad;
+        break;
+      case sExitHumedad:
+        stop = 0;
         break;
       default:
         break;
@@ -337,8 +365,9 @@ static void *pSensorFotoelectrico(void *arg) {
   SENSOR_FOTOELECTRICO_ESTADOS state, state_next;
   msg_t InMsg, OutMsg;
   state_next = IdleFoto;
+  int stop = 1;
 
-  for (;;) {
+  while (stop) {
     state = state_next;
     InMsg = receiveMessage(&(queue[SENSOR_FOTOELECTRICO]));
     switch (state) {
@@ -351,6 +380,9 @@ static void *pSensorFotoelectrico(void *arg) {
         OutMsg.signal = sLlegaCarroSistema;
         sendMessage(&(queue[SISTEMA]), OutMsg);
         state_next = IdleFoto;
+        break;
+      case sExitFotoElectrico:
+        stop = 0;
         break;
       default:
         break;
@@ -367,8 +399,9 @@ static void *pSensorRFID(void *arg) {
   SENSOR_RFID_ESTADOS state, state_next;
   msg_t InMsg, OutMsg;
   state_next = IdleRFID;
+  int stop = 1;
 
-  for (;;) {
+  while (stop) {
     state = state_next;
     InMsg = receiveMessage(&(queue[SENSOR_RFID]));
     switch (state) {
@@ -382,6 +415,9 @@ static void *pSensorRFID(void *arg) {
         OutMsg.value = InMsg.value;
         sendMessage(&(queue[SISTEMA]), OutMsg);
         state_next = IdleRFID;
+        break;
+      case sExitRFID:
+        stop = 0;
         break;
       default:
         break;
@@ -398,8 +434,9 @@ static void *pPanelAcceso(void *arg) {
   PANEL_ACCESO_ESTADOS state, state_next;
   msg_t InMsg, OutMsg;
   state_next = IdlePanel;
+  int exit = 1;
 
-  for (;;) {
+  while (exit) {
     state = state_next;
     InMsg = receiveMessage(&(queue[PANEL_ACCESO]));
     switch (state) {
@@ -413,6 +450,9 @@ static void *pPanelAcceso(void *arg) {
         OutMsg.sender = InMsg.sender;
         sendMessage(&(queue[SISTEMA]), OutMsg);
         state_next = IdlePanel;
+        break;
+      case sExitPanelAcceso:
+        exit = 0;
         break;
       default:
         break;
@@ -444,13 +484,23 @@ static void *pControladorCasa(void *arg) {
   pthread_create(&humo_pid, NULL, pSensorHumo, (void *)&pr_humo);
 
   state_next = IdleCasa;
-  for (;;) {
+  int exit = 1;
+  while (exit) {
     state = state_next;
     InMsg = receiveMessage(&(queue[idCasa]));
 
     switch (state) {
     case IdleCasa:
       switch (InMsg.signal) {
+      case sExitCasa:
+        OutMsg.signal = sExitMov;
+        sendMessage(&(queue[idCasa + NUM_CASAS]), OutMsg);
+
+        OutMsg.signal = sExitHumo;
+        sendMessage(&(queue[idCasa + NUM_CASAS * 2]), OutMsg);
+
+        exit = 0;
+        break;
       case sNotificarCasa:
         printf("\t\t\t Notificando al residente de una visita.\n"
                "\t\t\t (Casa %d -> Residente)\n",
@@ -506,7 +556,8 @@ static void *pControladorCasa(void *arg) {
         switch ((int)InMsg.value) {
         case 0:
           if (alarmaRobo == 1) {
-            printf("\t\t\t No se puede desactivar seguridad en Casa %d, Alarma de robo "
+            printf("\t\t\t No se puede desactivar seguridad en Casa %d, Alarma "
+                   "de robo "
                    "activa.\n",
                    idCasa);
             fflush(stdout);
@@ -549,6 +600,15 @@ static void *pControladorCasa(void *arg) {
         OutMsg.sender = idCasa;
         sendMessage(&(queue[SISTEMA]), OutMsg);
         state_next = IdleCasa;
+        break;
+      case sExitCasa:
+        OutMsg.signal = sExitMov;
+        sendMessage(&(queue[idCasa + NUM_CASAS]), OutMsg);
+
+        OutMsg.signal = sExitHumo;
+        sendMessage(&(queue[idCasa + NUM_CASAS * 2]), OutMsg);
+
+        exit = 0;
         break;
       default:
         sendMessage(&(queue[idCasa]), InMsg);
@@ -605,28 +665,42 @@ static void *pSistema(void *arg) {
   pthread_t regado_tid, peatonal_pid, parqueadero_pid;
   pthread_t pCasas[NUM_CASAS + 1];
   pthread_t pHumedad[NUM_SENSOR_HUMEDAD + 1];
-  int id_casa_respuesta;
+  int id_casa_respuesta, puerta_peatonal = -1, puerta_parqueadero = -1,
+                         regando_activo = -1;
 
   // Instancias de Casas
   for (int index = 1; index <= NUM_CASAS; index++) {
     pthread_create(&pCasas[index], NULL, pControladorCasa, (void *)&index);
+    sleep(1);
   }
 
   // Instancias de Sensores de Humedad
   for (int index = 1; index <= NUM_SENSOR_HUMEDAD; index++) {
     pthread_create(&pHumedad[index], NULL, pSensorHumedad, (void *)&index);
+    sleep(1);
   }
 
   double tarjetasValidas[4] = {1, 2, 3, 4};
   char placasValidas[5][7] = {"JFU864", "AAA000", "AAA001", "BBB000", "BBB001"};
   int tarjetaValida = 0, placaValida = 0;
+  int exit = 1;
 
-  for (;;) {
+  while (exit) {
     state = state_next;
     InMsg = receiveMessage(&(queue[SISTEMA]));
     switch (state) {
     case IdleSistema:
       switch (InMsg.signal) {
+      case sExitSistema:
+        OutMsg.signal = sExitCasa;
+        for (int index = 1; index <= NUM_CASAS; index++)
+          sendMessage(&(queue[index]), OutMsg);
+
+        OutMsg.signal = sExitHumedad;
+        for (int index = 1; index <= NUM_SENSOR_HUMEDAD; index++)
+          sendMessage(&(queue[10 + index - 1]), OutMsg);
+        exit = 0;
+        break;
       case sSolicitud:
         printf("\t\t\t Sistema -> Casa %d\n", InMsg.sender);
         fflush(stdout);
@@ -642,7 +716,8 @@ static void *pSistema(void *arg) {
         state_next = EsperandoFoto;
         break;
       case sLecturaRFID:
-        for (int i = 0; i < sizeof(tarjetasValidas) / sizeof(tarjetasValidas[0]); i++) {
+        for (int i = 0;
+             i < sizeof(tarjetasValidas) / sizeof(tarjetasValidas[0]); i++) {
           if (tarjetasValidas[i] == InMsg.value) {
             tarjetaValida = 1;
             break;
@@ -652,7 +727,8 @@ static void *pSistema(void *arg) {
         if (tarjetaValida) {
           tarjetaValida = 0;
           printf("\t\t\t Tarjeta %d ID Valida.\n", (int)InMsg.value);
-          pthread_create(&peatonal_pid, NULL, abrirPuerta, (void *)"peatonal");
+          puerta_peatonal = pthread_create(&peatonal_pid, NULL, abrirPuerta,
+                                           (void *)"peatonal");
         } else {
           printf("\t\t\t Tarjeta %d invalida.\n", (int)InMsg.value);
           fflush(stdout);
@@ -671,7 +747,8 @@ static void *pSistema(void *arg) {
       case sNivelHumedadSistema:
         if (InMsg.value <= 0.5) {
           // Creando el proceso de regado
-          pthread_create(&regado_tid, NULL, pRegado, (void *)&InMsg.sender);
+          regando_activo =
+              pthread_create(&regado_tid, NULL, pRegado, (void *)&InMsg.sender);
 
           printf("\t\t\t Se tiene que activar los aspersores (Sistema -> "
                  "Regado)\n");
@@ -681,7 +758,8 @@ static void *pSistema(void *arg) {
           OutMsg.value = 5 / InMsg.value;
           sendMessage(&(queue[REGADO]), OutMsg);
         } else {
-          printf("\t\t\t No se necesita regar las plantas en zona %d.\n", InMsg.sender);
+          printf("\t\t\t No se necesita regar las plantas en zona %d.\n",
+                 InMsg.sender);
           fflush(stdout);
         }
         state_next = IdleSistema;
@@ -706,8 +784,8 @@ static void *pSistema(void *arg) {
             printf("\t\t\t Invitado aceptado.\n");
             fflush(stdout);
 
-            pthread_create(&peatonal_pid, NULL, abrirPuerta,
-                           (void *)"peatonal");
+            puerta_peatonal = pthread_create(&peatonal_pid, NULL, abrirPuerta,
+                                             (void *)"peatonal");
           } else {
             printf("\t\t\t Invitado rechazado.\n");
             fflush(stdout);
@@ -717,6 +795,17 @@ static void *pSistema(void *arg) {
           printf("\t\t\t Casa %d No esta esperando visitas.\n", InMsg.sender);
           fflush(stdout);
         }
+        break;
+      case sExitSistema:
+        OutMsg.signal = sExitCasa;
+        for (int index = 1; index <= NUM_CASAS; index++)
+          sendMessage(&(queue[index]), OutMsg);
+
+        OutMsg.signal = sExitHumedad;
+        for (int index = 1; index <= NUM_SENSOR_HUMEDAD; index++)
+          sendMessage(&(queue[10 + index - 1]), OutMsg);
+
+        exit = 0;
         break;
       default:
         sendMessage(&(queue[SISTEMA]), InMsg);
@@ -739,6 +828,17 @@ static void *pSistema(void *arg) {
           state_next = EsperandoPolicia;
         }
         break;
+      case sExitSistema:
+        OutMsg.signal = sExitCasa;
+        for (int index = 1; index <= NUM_CASAS; index++)
+          sendMessage(&(queue[index]), OutMsg);
+
+        OutMsg.signal = sExitHumedad;
+        for (int index = 1; index <= NUM_SENSOR_HUMEDAD; index++)
+          sendMessage(&(queue[10 + index - 1]), OutMsg);
+
+        exit = 0;
+        break;
       default:
         sendMessage(&(queue[SISTEMA]), InMsg);
         break;
@@ -747,6 +847,9 @@ static void *pSistema(void *arg) {
     case EsperandoFoto:
       switch (InMsg.signal) {
       case sLecturaCamara:
+        printf("\t\t\t Enviando placa %s (Camara -> Sistema).\n", InMsg.placa);
+        fflush(stdout);
+
         printf("\t\t\t Apagar camara.\n");
         fflush(stdout);
 
@@ -759,13 +862,24 @@ static void *pSistema(void *arg) {
         }
         if (placaValida) {
           placaValida = 0;
-          pthread_create(&parqueadero_pid, NULL, abrirPuerta,
-                         (void *)"parqueadero");
+          puerta_parqueadero = pthread_create(
+              &parqueadero_pid, NULL, abrirPuerta, (void *)"parqueadero");
         } else {
           printf("\t\t\t La placa es invalida.\n");
           fflush(stdout);
         }
         state_next = IdleSistema;
+        break;
+      case sExitSistema:
+        OutMsg.signal = sExitCasa;
+        for (int index = 1; index <= NUM_CASAS; index++)
+          sendMessage(&(queue[index]), OutMsg);
+
+        OutMsg.signal = sExitHumedad;
+        for (int index = 1; index <= NUM_SENSOR_HUMEDAD; index++)
+          sendMessage(&(queue[10 + index - 1]), OutMsg);
+
+        exit = 0;
         break;
       default:
         sendMessage(&(queue[SISTEMA]), InMsg);
@@ -783,7 +897,15 @@ static void *pSistema(void *arg) {
   for (int index = 1; index <= NUM_SENSOR_HUMEDAD; index++)
     pthread_join(pHumedad[index], NULL);
 
-  pthread_join(peatonal_pid, NULL);
+  if (puerta_peatonal == 0)
+    pthread_join(peatonal_pid, NULL);
+
+  if (puerta_parqueadero == 0)
+    pthread_join(parqueadero_pid, NULL);
+
+  if (regando_activo == 0)
+    pthread_join(regado_tid, NULL);
+
   return NULL;
 }
 

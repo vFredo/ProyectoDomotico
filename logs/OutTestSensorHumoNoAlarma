@@ -1,0 +1,31 @@
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Elija la casa la cual se le envia la señal entre 1-3
+Digite un valor para el nivel de humo entre 0.0 y 1.0:
+			 Sensor Humo 7 -> Casa 1.
+			 Alarma de humo desactivada casa 1.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Saliendo del programa...

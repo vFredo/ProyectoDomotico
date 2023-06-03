@@ -1,0 +1,120 @@
+[H[2J
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Elija la casa la cual se le envia la señal entre 1-3
+Digite un valor para el nivel de humo entre 0.0 y 1.0:
+			 Sensor Humo 8 -> Casa 2.
+			 Alarma de humo activada. (Casa 2 -> Sistema)
+			 Incendio en Casa 2
+			 Alertar vecinos de incendio
+			 Alertar bomberos de incendio
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Elija la casa la cual se le envia la señal entre 1-3
+			 (Panel de Acceso Casa 3 -> Sistema)
+			 Sistema -> Casa 3
+			 Notificando al residente de una visita.
+			 (Casa 3 -> Residente)
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Elija la casa la cual se le envia la señal entre 1-3
+
+0. Rechazar Invitado.
+1. Aceptar Invitado.
+			 Respuesta Residente (Casa 3 -> Sistema).
+			 Invitado aceptado.
+			 Se abre la puerta peatonal por 5 sec.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Elija la casa la cual se le envia la señal entre 1-3
+0. Desactivar seguridad
+1. Activar seguridad
+			 Seguridad activada en Casa 1.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Elija que casa enviar la señal selecciones entre 1-3
+			 Sensor Humedad 2 -> Sistema.
+			 No se necesita regar las plantas en zona 2.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Elija que casa enviar la señal selecciones entre 1-3
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Saliendo del programa...
+			 Se cierra la puerta.

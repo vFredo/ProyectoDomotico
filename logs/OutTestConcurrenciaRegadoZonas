@@ -1,0 +1,71 @@
+[H[2J
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Digite la zona del sensor que quiere activar [1-3]
+Digite un valor para la humedad de 0.0 a 1.0:
+			 Sensor Humedad 1 -> Sistema.
+			 Se tiene que activar los aspersores (Sistema -> Regado)
+			 Activando aspersores por 10 sec en zona 1.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Digite la zona del sensor que quiere activar [1-3]
+Digite un valor para la humedad de 0.0 a 1.0:
+			 Sensor Humedad 2 -> Sistema.
+			 Se tiene que activar los aspersores (Sistema -> Regado)
+			 Activando aspersores por 12 sec en zona 2.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Digite la zona del sensor que quiere activar [1-3]
+Digite un valor para la humedad de 0.0 a 1.0:
+			 Sensor Humedad 3 -> Sistema.
+			 Se tiene que activar los aspersores (Sistema -> Regado)
+			 Activando aspersores por 16 sec en zona 3.
+
+Environment:                     Sistema Residencial Domotico
+-------------------------------------------------------------
+1. Activar sensor movimiento de casa
+2. Nivel de humo (Sensor humo)
+3. Riego plantas (Sensor humedad)
+4. Ingreso carro (Sensor foto electricto)
+5. Ingreso residente (Sensor RFID)
+6. Ingreso visitante (Panel Acceso)
+7. Seguridad casa On/Off
+8. Llega policia a la unidad residencial
+9. Residente acepta/rechaza invitado
+10. Exit
+Saliendo del programa...
+			 Desactivando aspersores en zona 1.
+			 Desactivando aspersores en zona 2.
+			 Desactivando aspersores en zona 3.
